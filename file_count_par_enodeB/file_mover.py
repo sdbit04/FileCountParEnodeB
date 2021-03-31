@@ -12,4 +12,9 @@ class FileMover(object):
         for file_name in file_list:
             input_file_path = os.path.join(self.in_dir_path, file_name)
             out_file_path = os.path.join(self.out_dir_path, file_name)
-            shutil.move(input_file_path, out_file_path)
+            try:
+                shutil.move(input_file_path, out_file_path)
+            except FileNotFoundError:
+                os.mkdir(self.out_dir_path)
+                shutil.move(input_file_path, out_file_path)
+

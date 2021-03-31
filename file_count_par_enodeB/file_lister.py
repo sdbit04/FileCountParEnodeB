@@ -16,7 +16,7 @@ class FileLister(object):
 
     def list_files(self):
         file_list = os.listdir(self.f_dir_path)
-        pdb.set_trace()
+        # pdb.set_trace()
         try:
             os.mkdir(self.result_location)
         except FileExistsError:
@@ -36,7 +36,14 @@ class FileLister(object):
 
 
 if __name__ == "__main__":
-    file_lister = FileLister('*', "D:\D_drive_BACKUP\MENTOR\yubaraj\Rename_sig\input", "D:\D_drive_BACKUP\MENTOR\yubaraj\Rename_sig\out")
+    import argparse
+    parser = argparse.ArgumentParser()
+    parser.add_argument("input_dir_path")
+    parser.add_argument("output_dir_path")
+    args = parser.parse_args()
+    input_dir = args.input_dir_path
+    output_dir = args.output_dir_path
+    file_lister = FileLister('*', input_dir, output_dir)
     file_lister.list_files()
 
 

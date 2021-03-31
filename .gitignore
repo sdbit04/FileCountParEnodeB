@@ -1,3 +1,6 @@
 .idea/
 ListOfFiles
 *.pyc
+build/
+dist/
+*.spec
