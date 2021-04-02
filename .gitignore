@@ -4,3 +4,4 @@ ListOfFiles
 build/
 dist/
 *.spec
+textfile.txt

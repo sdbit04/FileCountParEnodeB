@@ -41,6 +41,11 @@ def write_to_report(enodeb_count_dict_sum: dict, report_file_path):
     w_book.save(report_file_path)
 
 
+def move_and_read_stat_files(stat_files_directory):
+    pass
+
+
+
 if __name__ == "__main__":
     stat_file_path = r"D:\D_drive_BACKUP\MENTOR\TurkTel\LTE_HUAWEI\Analysis\Antalya\files_not_veing_collected_1.txt"
     report_file_path = r"D:\D_drive_BACKUP\MENTOR\TurkTel\LTE_HUAWEI\Analysis\Antalya\report.xlsx"
