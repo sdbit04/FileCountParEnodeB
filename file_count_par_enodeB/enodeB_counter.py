@@ -2,7 +2,35 @@ import re
 import openpyxl
 
 
-def search_enodeb_n_count(stats_file, enode_pattern, enodeb_count_dict):
+def search_enodeb_n_file_count_per_day(stats_file, stat_date, enode_pattern, enodeb_count_dict):
+    stat_date = stat_date
+    search_pattern = enode_pattern
+    search_pattern_ob = re.compile(search_pattern, re.IGNORECASE)
+    try:
+        with open(stats_file, 'r') as stat_file:
+            for line in stat_file.readlines():
+                try:
+                    match = search_pattern_ob.search(line).group(1)
+                    match_with_date = "{}_{}".format(match, stat_date)
+                except AttributeError:
+                    # pdb.set_trace()
+                    # Ignoring end of file blank lines
+                    pass
+                else:
+                    try:
+                        old_count = enodeb_count_dict[match_with_date]
+                    except KeyError:
+                        enodeb_count_dict[match_with_date] = 1
+                    else:
+                        current_count = old_count+1
+                        enodeb_count_dict[match_with_date] = current_count
+    except (FileNotFoundError, IsADirectoryError):
+        print("Stat file {} was not readable")
+    finally:
+        return enodeb_count_dict
+
+
+def search_enodeb_n_file_count(stats_file, enode_pattern, enodeb_count_dict):
     search_pattern = enode_pattern
     search_pattern_ob = re.compile(search_pattern, re.IGNORECASE)
     try:
@@ -26,6 +54,16 @@ def search_enodeb_n_count(stats_file, enode_pattern, enodeb_count_dict):
         print("Stat file {} was not readable")
     finally:
         return enodeb_count_dict
+
+import os
+def read_stat_from_a_date_directory(date_directory_path, enodeB_pattern):
+    date_directory = os.path.realpath(date_directory_path)
+    stat_files_list = os.listdir(date_directory)
+    enodeB_count_dict = {}
+    for file_name in stat_files_list:
+        file_path = os.path.join(date_directory, file_name)
+        search_enodeb_n_file_count(file_path, enodeB_pattern, enodeB_count_dict)
+    return enodeB_count_dict
 
 
 def write_to_report(enodeb_count_dict_sum: dict, report_file_path):
