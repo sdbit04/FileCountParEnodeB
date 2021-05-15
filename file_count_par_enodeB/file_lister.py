@@ -12,28 +12,24 @@ class FileLister(object):
     def __init__(self, file_pattern, in_directory_path, out_dir_path, current_dir, date_dir):
         self.provided_f_pattern = file_pattern
         self.provided_in_dir_path = os.path.realpath(in_directory_path)
-        self.provided_out_dir_path = os.path.realpath(out_dir_path)
+        self.provided_out_dir_path = pathlib.Path(out_dir_path)
+
         self.daily_stat_directory = date_dir
         self.current_dir = current_dir
-
-
         self.result_location = pathlib.Path(
-            os.path.join(self.current_dir, "ListOfFiles", self.daily_stat_directory))
+            os.path.join(self.current_dir, "CollectionStatDump", self.daily_stat_directory))
         self.result_location.mkdir(parents=True, exist_ok=True)
+        self.provided_out_dir_path.mkdir(parents=True, exist_ok=True)
         self.log_dir = pathlib.Path(self.current_dir, 'Logs')
         self.log_dir.mkdir(parents=True, exist_ok=True)
         self.log_path = os.path.join(self.log_dir, "{}.log".format(self.daily_stat_directory))
         try:
             with open(self.log_path, 'a') as log_file:
-                print("Start generation of stat files for, Daily directory {}".format(self.daily_stat_directory), file=log_file)
+                print("*** {} : Start generation of stat files for, Daily directory {} ***".format(time.strftime("%Y/%m/%d %H:%M", time.localtime()),  self.daily_stat_directory), file=log_file)
         except FileNotFoundError:
             with open(self.log_path, 'w') as log_file:
-                print("Start generation of stat files for, Daily directory {}".format(self.daily_stat_directory), file=log_file)
-        try:
-            os.mkdir(self.provided_out_dir_path)
-        except FileExistsError:
-            with open(self.log_path, 'a') as log_file:
-                print("Out directory already exist, so proceeding", file=log_file)
+                print("*** {} : Start generation of stat files for, Daily directory {} ***".format(
+                    time.strftime("%Y/%m/%d %H:%M", time.localtime()), self.daily_stat_directory), file=log_file)
 
     def list_files_n_move_mlt(self):
         dir_vs_its_file_list = {}
@@ -53,7 +49,6 @@ class FileLister(object):
                 # One file mover object for each directory
                 file_mover = FileMover(dir, current_base_dir_name, inside_files, self.provided_out_dir_path, self.result_location, self.log_path)
                 thread_list.insert(thread_count, Thread(target=file_mover.move_files_under_a_dir, name=current_base_dir_name))
-
             for thread in thread_list:
                 with open(self.log_path, 'a') as log_file:
                     print("Starting thread for {}".format(thread.getName()), file=log_file)
@@ -65,7 +60,8 @@ class FileLister(object):
             with open(self.log_path, 'a') as log_file:
                 print("Exception caught in high level inside any thread", file=log_file)
         else:
-            print("Process of stat generation and file moving is done")
+            with open(self.log_path, 'a') as log_file:
+                print("Process of stat generation and file moving is done", file=log_file)
 
     def list_files_n_move_mlt_mlt(self):
         """NOt yet in use

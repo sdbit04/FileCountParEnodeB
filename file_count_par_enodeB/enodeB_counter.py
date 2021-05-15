@@ -41,6 +41,7 @@ def search_enodeb_n_file_count(stats_file, enode_pattern, enodeb_count_dict):
                 except AttributeError:
                     # pdb.set_trace()
                     # Ignoring end of file blank lines
+                    print("No Match found for the input pattern {}".format(search_pattern))
                     pass
                 else:
                     try:
@@ -79,15 +80,28 @@ def write_to_report(enodeb_count_dict_sum: dict, report_file_path):
     w_book.save(report_file_path)
 
 
+def read_from_each_date_directory_n_generate_report(parent_stat_dir, enb_pattern, report_directory):
+    for dir in os.listdir(parent_stat_dir):
+        report_file_path = os.path.join(report_directory, "{}.xlsx".format(dir))
+        current_dir_path = os.path.join(parent_stat_dir, dir)
+        file_count_per_enb_sum_dict = read_stat_from_a_date_directory(current_dir_path,enb_pattern)
+        write_to_report(file_count_per_enb_sum_dict, report_file_path)
+
+
 def move_and_read_stat_files(stat_files_directory):
     pass
 
 
 if __name__ == "__main__":
-    stat_file_path = r"D:\D_drive_BACKUP\MENTOR\TurkTel\LTE_HUAWEI\Analysis\Antalya\files_not_veing_collected_1.txt"
-    report_file_path = r"D:\D_drive_BACKUP\MENTOR\TurkTel\LTE_HUAWEI\Analysis\Antalya\report.xlsx"
-    EnodeB_pattern = "_*(L[0-9A-Za-z]+)_"
-    global_enodeb_count_dict = {}
-    global_enodeb_count_dict = search_enodeb_n_count(stat_file_path, EnodeB_pattern, global_enodeb_count_dict)
-    print(global_enodeb_count_dict)
-    write_to_report(global_enodeb_count_dict, report_file_path)
+    import argparse
+    parser = argparse.ArgumentParser()
+    parser.add_argument("stat_date_dirs_root")
+    parser.add_argument("report_dir_path")
+    parser.add_argument("-o", "--enbpatt", help="Please provided EnodB Pattern except it is LTE Huawei")
+    args = parser.parse_args()
+    stat_date_dirs_root = args.stat_date_dirs_root
+    report_dir_path = args.report_dir_path
+    EnodeB_pattern = args.enbpatt
+    if EnodeB_pattern is None:
+        EnodeB_pattern = "_*(L[0-9A-Za-z]+)_"
+    read_from_each_date_directory_n_generate_report(stat_date_dirs_root, EnodeB_pattern, report_dir_path)

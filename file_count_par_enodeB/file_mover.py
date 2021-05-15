@@ -42,16 +42,12 @@ class FileMover(object):
         """
         # corresponding_out_dir = os.path.join(self.out_dir_path, current_base_dir)
         try:
-            os.mkdir(os.path.realpath(self.out_dir_path))
-        except FileExistsError:
-            pass
-        try:
             os.mkdir(self.result_location)
         except FileExistsError:
             pass
 
         try:
-            with open(os.path.join(self.result_location, self.current_base_dir_name), 'a') as list_file:
+            with open(os.path.join(self.result_location, "{}.dat".format(self.current_base_dir_name)), 'a') as list_file:
                 print("Moving and listing files of {} directory ".format(self.current_base_dir_name))
                 for file_name in self.inside_files:
                     list_file.write(file_name + "\n")
