@@ -25,7 +25,7 @@ class FileLister(object):
         self.log_path = os.path.join(self.log_dir, "{}.log".format(self.daily_stat_directory))
         try:
             with open(self.log_path, 'a') as log_file:
-                print("*** {} : Start generation of stat files for, Daily directory {} ***".format(time.strftime("%Y/%m/%d %H:%M", time.localtime()),  self.daily_stat_directory), file=log_file)
+                print("*** {} : Start generation of stat files for date {} ***".format(time.strftime("%Y/%m/%d %H:%M", time.localtime()),  self.daily_stat_directory), file=log_file)
         except FileNotFoundError:
             with open(self.log_path, 'w') as log_file:
                 print("*** {} : Start generation of stat files for, Daily directory {} ***".format(

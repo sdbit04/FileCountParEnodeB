@@ -1,8 +1,14 @@
+import pathlib
 import re
 import openpyxl
+import os
 
 
 def search_enodeb_n_file_count_per_day(stats_file, stat_date, enode_pattern, enodeb_count_dict):
+    """Not in use.
+    This function work for one file.
+    read, search for particular pattern, increases match count,
+    Finally contribute to the storage dict object"""
     stat_date = stat_date
     search_pattern = enode_pattern
     search_pattern_ob = re.compile(search_pattern, re.IGNORECASE)
@@ -10,6 +16,7 @@ def search_enodeb_n_file_count_per_day(stats_file, stat_date, enode_pattern, eno
         with open(stats_file, 'r') as stat_file:
             for line in stat_file.readlines():
                 try:
+                    # search for a match, extract group1 from the match object
                     match = search_pattern_ob.search(line).group(1)
                     match_with_date = "{}_{}".format(match, stat_date)
                 except AttributeError:
@@ -25,9 +32,10 @@ def search_enodeb_n_file_count_per_day(stats_file, stat_date, enode_pattern, eno
                         current_count = old_count+1
                         enodeb_count_dict[match_with_date] = current_count
     except (FileNotFoundError, IsADirectoryError):
-        print("Stat file {} was not readable")
-    finally:
-        return enodeb_count_dict
+        print("Stat file {} was not readable".format(stat_file))
+    # finally:
+    #     as dict is mutable object, so we don't return it.
+    #     return enodeb_count_dict
 
 
 def search_enodeb_n_file_count(stats_file, enode_pattern, enodeb_count_dict):
@@ -41,7 +49,7 @@ def search_enodeb_n_file_count(stats_file, enode_pattern, enodeb_count_dict):
                 except AttributeError:
                     # pdb.set_trace()
                     # Ignoring end of file blank lines
-                    print("No Match found for the input pattern {}".format(search_pattern))
+                    print("No Match found in {}".format(line))
                     pass
                 else:
                     try:
@@ -53,18 +61,18 @@ def search_enodeb_n_file_count(stats_file, enode_pattern, enodeb_count_dict):
                         enodeb_count_dict[match] = current_count
     except (FileNotFoundError, IsADirectoryError):
         print("Stat file {} was not readable")
-    finally:
-        return enodeb_count_dict
+    # finally:
+    #     return enodeb_count_dict
 
-import os
+
 def read_stat_from_a_date_directory(date_directory_path, enodeB_pattern):
     date_directory = os.path.realpath(date_directory_path)
     stat_files_list = os.listdir(date_directory)
-    enodeB_count_dict = {}
+    enodeB_count_dict_for_a_date = {}
     for file_name in stat_files_list:
         file_path = os.path.join(date_directory, file_name)
-        search_enodeb_n_file_count(file_path, enodeB_pattern, enodeB_count_dict)
-    return enodeB_count_dict
+        search_enodeb_n_file_count(file_path, enodeB_pattern, enodeB_count_dict_for_a_date)
+    return enodeB_count_dict_for_a_date
 
 
 def write_to_report(enodeb_count_dict_sum: dict, report_file_path):
@@ -80,10 +88,12 @@ def write_to_report(enodeb_count_dict_sum: dict, report_file_path):
     w_book.save(report_file_path)
 
 
-def read_from_each_date_directory_n_generate_report(parent_stat_dir, enb_pattern, report_directory):
-    for dir in os.listdir(parent_stat_dir):
+def read_from_each_date_directory_n_generate_report(stat_root_dir, enb_pattern, report_directory):
+    report_directory = pathlib.Path(report_directory)
+    report_directory.mkdir(parents=True, exist_ok=True)
+    for dir in os.listdir(stat_root_dir):
         report_file_path = os.path.join(report_directory, "{}.xlsx".format(dir))
-        current_dir_path = os.path.join(parent_stat_dir, dir)
+        current_dir_path = os.path.join(stat_root_dir, dir)
         file_count_per_enb_sum_dict = read_stat_from_a_date_directory(current_dir_path,enb_pattern)
         write_to_report(file_count_per_enb_sum_dict, report_file_path)
 
@@ -97,11 +107,11 @@ if __name__ == "__main__":
     parser = argparse.ArgumentParser()
     parser.add_argument("stat_date_dirs_root")
     parser.add_argument("report_dir_path")
-    parser.add_argument("-o", "--enbpatt", help="Please provided EnodB Pattern except it is LTE Huawei")
+    parser.add_argument("-e", "--enbpatt", help="Please provided EnodB Pattern except it is LTE Huawei")
     args = parser.parse_args()
     stat_date_dirs_root = args.stat_date_dirs_root
     report_dir_path = args.report_dir_path
     EnodeB_pattern = args.enbpatt
     if EnodeB_pattern is None:
-        EnodeB_pattern = "_*(L[0-9A-Za-z]+)_"
+        EnodeB_pattern = "^(L[0-9A-Za-z]+)_"
     read_from_each_date_directory_n_generate_report(stat_date_dirs_root, EnodeB_pattern, report_dir_path)
