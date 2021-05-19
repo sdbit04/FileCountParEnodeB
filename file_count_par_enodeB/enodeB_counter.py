@@ -113,5 +113,5 @@ if __name__ == "__main__":
     report_dir_path = args.report_dir_path
     EnodeB_pattern = args.enbpatt
     if EnodeB_pattern is None:
-        EnodeB_pattern = "^(\w+)_"
+        EnodeB_pattern = "^([0-9A-Za-z]+)_"
     read_from_each_date_directory_n_generate_report(stat_date_dirs_root, EnodeB_pattern, report_dir_path)
