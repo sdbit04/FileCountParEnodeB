@@ -38,7 +38,7 @@ def search_enodeb_n_file_count_per_day(stats_file, stat_date, enode_pattern, eno
     #     return enodeb_count_dict
 
 
-def search_enodeb_n_file_count(stats_file, enode_pattern, enodeb_count_dict):
+def search_enodeb_n_get_sig_file_count(stats_file, enode_pattern, enodeb_count_dict):
     search_pattern = enode_pattern
     search_pattern_ob = re.compile(search_pattern, re.IGNORECASE)
     try:
@@ -71,7 +71,7 @@ def read_stat_from_a_date_directory(date_directory_path, enodeB_pattern):
     enodeB_count_dict_for_a_date = {}
     for file_name in stat_files_list:
         file_path = os.path.join(date_directory, file_name)
-        search_enodeb_n_file_count(file_path, enodeB_pattern, enodeB_count_dict_for_a_date)
+        search_enodeb_n_get_sig_file_count(file_path, enodeB_pattern, enodeB_count_dict_for_a_date)
     return enodeB_count_dict_for_a_date
 
 
@@ -91,9 +91,9 @@ def write_to_report(enodeb_count_dict_sum: dict, report_file_path):
 def read_from_each_date_directory_n_generate_report(stat_root_dir, enb_pattern, report_directory):
     report_directory = pathlib.Path(report_directory)
     report_directory.mkdir(parents=True, exist_ok=True)
-    for dir in os.listdir(stat_root_dir):
-        report_file_path = os.path.join(report_directory, "{}.xlsx".format(dir))
-        current_dir_path = os.path.join(stat_root_dir, dir)
+    for date_dir in os.listdir(stat_root_dir):
+        report_file_path = os.path.join(report_directory, "{}.xlsx".format(date_dir))
+        current_dir_path = os.path.join(stat_root_dir, date_dir)
         file_count_per_enb_sum_dict = read_stat_from_a_date_directory(current_dir_path,enb_pattern)
         write_to_report(file_count_per_enb_sum_dict, report_file_path)
 
@@ -113,5 +113,5 @@ if __name__ == "__main__":
     report_dir_path = args.report_dir_path
     EnodeB_pattern = args.enbpatt
     if EnodeB_pattern is None:
-        EnodeB_pattern = "^(L[0-9A-Za-z]+)_"
+        EnodeB_pattern = "^(\w+)_"
     read_from_each_date_directory_n_generate_report(stat_date_dirs_root, EnodeB_pattern, report_dir_path)
